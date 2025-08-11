@@ -184,13 +184,13 @@
     <script>
         // Diccionario de palabras - Puedes agregar más palabras aquí
         const dictionary = {
-            "luvilar": {
+          "luvilar": {
                 definition: "El ligero sonido que hace la lluvia al caer, al rebotar contra el suelo, las ventanas, el techo u otras superficies.",
                 preview: "Sonido de la lluvia al caer..."
             },
             "luvillar":{
                 definition: "Un luvilar intenso, debido a fuertes lluvias o granizo",
-                previw: "Un luvilar intenso ..."
+                preview: "Un luvilar intenso ..."
             },
             
             "luminvacuo": {
@@ -210,10 +210,12 @@
             const noResults = document.getElementById('noResults');
             const wordCount = document.getElementById('wordCount');
             
-            const filteredWords = Object.keys(dictionary).filter(word => 
-                word.toLowerCase().includes(currentFilter.toLowerCase()) ||
-                dictionary[word].definition.toLowerCase().includes(currentFilter.toLowerCase())
-            );
+            const filteredWords = Object.keys(dictionary)
+                .filter(word => 
+                    word.toLowerCase().includes(currentFilter.toLowerCase()) ||
+                    dictionary[word].definition.toLowerCase().includes(currentFilter.toLowerCase())
+                )
+                .sort(); // Orden alfabético
 
             if (filteredWords.length === 0 && currentFilter !== '') {
                 wordListContainer.style.display = 'none';
