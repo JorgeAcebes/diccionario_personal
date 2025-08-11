@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diccionario de Palabras Inventadas</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', serif;
+            background-color: #ffffff;
+            color: #000000;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            border-bottom: 2px solid #000;
+            padding-bottom: 20px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            font-weight: normal;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-style: italic;
+            color: #333;
+        }
+
+        .search-container {
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        .search-box {
+            width: 100%;
+            max-width: 400px;
+            padding: 15px;
+            font-size: 1.1em;
+            border: 2px solid #000;
+            background-color: #fff;
+            color: #000;
+            outline: none;
+            font-family: inherit;
+        }
+
+        .search-box:focus {
+            border-color: #333;
+            box-shadow: 0 0 5px rgba(0,0,0,0.2);
+        }
+
+        .dictionary-container {
+            margin-top: 30px;
+        }
+
+        .word-list {
+            display: block;
+        }
+
+        .word-item {
+            margin-bottom: 15px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background-color: #fff;
+        }
+
+        .word-item:hover {
+            background-color: #f9f9f9;
+            border-color: #000;
+        }
+
+        .word-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .word-preview {
+            color: #666;
+            font-style: italic;
+        }
+
+        .definition-view {
+            display: none;
+            padding: 30px;
+            border: 2px solid #000;
+            background-color: #fff;
+            margin-bottom: 20px;
+        }
+
+        .definition-view.active {
+            display: block;
+        }
+
+        .definition-word {
+            font-size: 2em;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-align: center;
+            text-transform: lowercase;
+        }
+
+        .definition-text {
+            font-size: 1.2em;
+            text-align: justify;
+            line-height: 1.8;
+        }
+
+        .back-button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #000;
+            color: #fff;
+            text-decoration: none;
+            margin-bottom: 20px;
+            cursor: pointer;
+            border: none;
+            font-family: inherit;
+            font-size: 1em;
+        }
+
+        .back-button:hover {
+            background-color: #333;
+        }
+
+        .no-results {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+            padding: 40px;
+            display: none;
+        }
+
+        .word-count {
+            text-align: center;
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 30px;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>DICCIONARIO</h1>
+        <p>Palabras que no existen... hasta ahora</p>
+    </div>
+
+    <div class="search-container">
+        <input type="text" class="search-box" placeholder="Buscar palabra..." id="searchInput">
+    </div>
+
+    <div class="dictionary-container">
+        <div class="word-count" id="wordCount"></div>
+        
+        <div class="definition-view" id="definitionView">
+            <button class="back-button" onclick="showWordList()">← Volver al diccionario</button>
+            <div class="definition-word" id="definitionWord"></div>
+            <div class="definition-text" id="definitionText"></div>
+        </div>
+
+        <div class="word-list" id="wordList"></div>
+        
+        <div class="no-results" id="noResults">
+            No se encontraron palabras que coincidan con tu búsqueda.
+        </div>
+    </div>
+
+    <script>
+        // Diccionario de palabras - Puedes agregar más palabras aquí
+        const dictionary = {
+            "luvillar": {
+                definition: "El ligero sonido que hace la lluvia al caer, al rebotar contra el suelo, las ventanas, el techo u otras superficies. También se refiere a un luvilar intenso, debido a fuertes lluvias o granizo.",
+                preview: "Sonido de la lluvia al caer..."
+            },
+            "luminvacuo": {
+                definition: "El ambiente causado por una iluminación más tenue en ciertos edificios públicos, típicos de los meses de invierno, en los que se nota de manera evidente la carencia de luz causada por una bombilla fundida.",
+                preview: "Ambiente de iluminación tenue en edificios públicos..."
+            },
+            "dentimación": {
+                definition: "La acción de prolongar la pasta de dientes hasta la última gota, motivado por aprovechar el máximo de la misma pero también como manera de postergar el tener que coger una pasta de dientes nueva.",
+                preview: "Acción de prolongar la pasta de dientes..."
+            }
+        };
+
+        let currentFilter = '';
+
+        function renderWordList() {
+            const wordListContainer = document.getElementById('wordList');
+            const noResults = document.getElementById('noResults');
+            const wordCount = document.getElementById('wordCount');
+            
+            const filteredWords = Object.keys(dictionary).filter(word => 
+                word.toLowerCase().includes(currentFilter.toLowerCase()) ||
+                dictionary[word].definition.toLowerCase().includes(currentFilter.toLowerCase())
+            );
+
+            if (filteredWords.length === 0 && currentFilter !== '') {
+                wordListContainer.style.display = 'none';
+                noResults.style.display = 'block';
+                wordCount.textContent = '';
+                return;
+            }
+
+            noResults.style.display = 'none';
+            wordListContainer.style.display = 'block';
+            
+            // Actualizar contador
+            const totalWords = Object.keys(dictionary).length;
+            if (currentFilter === '') {
+                wordCount.textContent = `${totalWords} palabra${totalWords !== 1 ? 's' : ''} en el diccionario`;
+            } else {
+                wordCount.textContent = `${filteredWords.length} de ${totalWords} palabras encontradas`;
+            }
+
+            wordListContainer.innerHTML = filteredWords.map(word => `
+                <div class="word-item" onclick="showDefinition('${word}')">
+                    <div class="word-title">${word}</div>
+                    <div class="word-preview">${dictionary[word].preview}</div>
+                </div>
+            `).join('');
+        }
+
+        function showDefinition(word) {
+            const definitionView = document.getElementById('definitionView');
+            const wordList = document.getElementById('wordList');
+            const definitionWord = document.getElementById('definitionWord');
+            const definitionText = document.getElementById('definitionText');
+            const wordCount = document.getElementById('wordCount');
+
+            definitionWord.textContent = word;
+            definitionText.textContent = dictionary[word].definition;
+
+            wordList.style.display = 'none';
+            wordCount.style.display = 'none';
+            definitionView.classList.add('active');
+        }
+
+        function showWordList() {
+            const definitionView = document.getElementById('definitionView');
+            const wordList = document.getElementById('wordList');
+            const wordCount = document.getElementById('wordCount');
+
+            definitionView.classList.remove('active');
+            wordList.style.display = 'block';
+            wordCount.style.display = 'block';
+        }
+
+        // Configurar búsqueda
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            currentFilter = e.target.value;
+            renderWordList();
+        });
+
+        // Navegación con teclado
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                showWordList();
+            }
+        });
+
+        // Inicializar la página
+        renderWordList();
+    </script>
+</body>
+</html>
